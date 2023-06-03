@@ -9,7 +9,7 @@ const PORT = 8080;
 const app = express();
 
 app.use(cors({
-    origin: ['https://fiverr-clone-zuhed.netlify.app'],
+    origin: ['http://localhost:3000', 'https://zuhedshaikh95.github.io'],
 }));
 app.use(express.json())
 app.use(express.urlencoded({ extended: true }));
