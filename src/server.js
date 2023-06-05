@@ -1,6 +1,7 @@
 require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
+const geoip = require('geoip-lite');
 const { connect } = require('./configs');
 const { Location } = require('./models');
 const PORT = 8080;
@@ -17,13 +18,6 @@ app.get('/', (request, response) => {
     return response.send('Hello, Topper!');
 });
 
-app.get('/ip', (request, response) => {
-    const ips = request.headers['x-forwarded-for'] || request.socket.remoteAddress;
-    const ip = ips.split(',')[0];
-
-    return response.send({ ipV6: request.ip, ipV4: ip });
-})
-
 app.get('/visit', async (request, response) => {
     const ips = request.headers['x-forwarded-for'] || request.socket.remoteAddress;
     const ip = ips.split(',')[0];
@@ -32,14 +26,26 @@ app.get('/visit', async (request, response) => {
         const locations = await Location.find({});
         for(let location of locations) {
             if(location.ip === ip) {
-                return response.status(200).send({
+                return response.send({
                     message: 'You are already visited!',
                     count: locations.length,
-                })
+                });
             }
         }
-        
-        return response.status(200).send({
+
+        const geoAddress = geoip.lookup(ip);
+        const location = new Location({
+            ip,
+            range: geoAddress.range,
+            country: geoAddress.country,
+            region: geoAddress.region,
+            timezone: geoAddress.timezone,
+            city: geoAddress.city,
+            ll: geoAddress.ll
+        });
+        await location.save();
+
+        return response.status(201).send({
             message: 'Welcome!',
             count: locations.length + 1,
         })

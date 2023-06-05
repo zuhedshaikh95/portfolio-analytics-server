@@ -13,9 +13,6 @@ const locationSchema = new mongoose.Schema({
     region: {
         type: String,
     },
-    eu: {
-        type: String
-    },
     timezone: {
         type: String,
     },
@@ -25,12 +22,6 @@ const locationSchema = new mongoose.Schema({
     ll: {
         type: [Number]
     },
-    metro: {
-        type: Number
-    },
-    area: {
-        type: Number
-    }
-}, { versionKey: false, timestamps: true });
+}, { versionKey: false });
 
 module.exports = mongoose.models.Location || mongoose.model('Location', locationSchema);
