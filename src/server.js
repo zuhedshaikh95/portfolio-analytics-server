@@ -1,7 +1,6 @@
 require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
-const satelize = require('satelize');
 const { connect } = require('./configs');
 const { Location } = require('./models');
 const PORT = 8080;
@@ -18,6 +17,13 @@ app.get('/', (request, response) => {
     return response.send('Hello, Topper!');
 });
 
+app.get('/ip', (request, response) => {
+    const ips = request.headers['x-forwarded-for'] || request.socket.remoteAddress;
+    const ip = ips.split(',')[0];
+
+    return response.send({ ipV6: request.ip, ipV4: ip });
+})
+
 app.get('/visit', async (request, response) => {
     const ips = request.headers['x-forwarded-for'] || request.socket.remoteAddress;
     const ip = ips.split(',')[0];
@@ -32,20 +38,7 @@ app.get('/visit', async (request, response) => {
                 })
             }
         }
-
-        const details = satelize.satelize({ ip }, (error, payload) => payload);
-        const newLocation = new Location({
-            ip,
-            continent_code: details.continent_code,
-            continent: details.continent.en,
-            country_code: details.country_code,
-            country: details.country.en,
-            latitude: details.latitude,
-            longitude: details.longitude,
-            timezone: details.timezone,
-        });
-
-        await newLocation.save();
+        
         return response.status(200).send({
             message: 'Welcome!',
             count: locations.length + 1,
