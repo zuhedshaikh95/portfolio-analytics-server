@@ -24,12 +24,12 @@ app.get('/visit', async (request, response) => {
 
     try {
         const location = await Location.findOne({ ip });
-        const locations = await Location.find({});
+        const count = await Location.count({});
 
         if (location) {
             return response.send({
                 message: 'You have already been visited!',
-                count: locations.length,
+                count,
             });
         }
 
@@ -47,7 +47,7 @@ app.get('/visit', async (request, response) => {
 
         return response.status(201).send({
             message: 'Welcome!',
-            count: locations.length + 1
+            count: count + 1
         })
     }
     catch ({ message }) {
