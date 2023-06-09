@@ -11,7 +11,7 @@ const app = express();
 app.use(cors({
     origin: ['http://localhost:3000', 'https://zuhedshaikh95.github.io'],
 }));
-app.use(express.json())
+app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 app.get('/', (request, response) => {
@@ -23,18 +23,18 @@ app.get('/visit', async (request, response) => {
     const ip = ips.split(',')[0];
 
     try {
+        const location = await Location.findOne({ ip });
         const locations = await Location.find({});
-        for(let location of locations) {
-            if(location.ip === ip) {
-                return response.send({
-                    message: 'You are already visited!',
-                    count: locations.length,
-                });
-            }
+
+        if (location) {
+            return response.send({
+                message: 'You have already been visited!',
+                count: locations.length,
+            });
         }
 
         const geoAddress = geoip.lookup(ip);
-        const location = new Location({
+        const newLocation = new Location({
             ip,
             range: geoAddress.range,
             country: geoAddress.country,
@@ -43,14 +43,14 @@ app.get('/visit', async (request, response) => {
             city: geoAddress.city,
             ll: geoAddress.ll
         });
-        await location.save();
+        await newLocation.save();
 
         return response.status(201).send({
             message: 'Welcome!',
-            count: locations.length + 1,
+            count: locations.length + 1
         })
     }
-    catch({ message }) {
+    catch ({ message }) {
         return response.status(500).send({
             message
         })
@@ -63,7 +63,7 @@ app.listen(PORT, async () => {
         await connect();
         console.log(`Listening at http://localhost:${PORT}`);
     }
-    catch({ message }) {
+    catch ({ message }) {
         console.log(message);
     }
 });

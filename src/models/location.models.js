@@ -4,6 +4,9 @@ const locationSchema = new mongoose.Schema({
     ip: {
         type: String,
     },
+    count: {
+        type: Number
+    },
     range: {
         type: [Number],
     },
