@@ -23,32 +23,41 @@ app.get('/visit', async (request, response) => {
     const ip = ips.split(',')[0];
 
     try {
-        const location = await Location.findOne({ ip });
-        const count = await Location.count({});
+        const data = await Location.aggregate([
+            {
+                $group: {
+                    _id: 'null',
+                    count: { $sum: 1 },
+                    exists: {
+                        $sum: {
+                            $cond: [{ $eq: ['$ip', ip] }, 1, 0],
+                        },
+                    },
+                },
+            },
+            {
+                $project: {
+                    _id: 0,
+                    count: 1,
+                    exists: {
+                        $cond: [{ $gt: ['$exists', 0] }, true, false],
+                    },
+                },
+            },
+        ]);
 
-        if (location) {
-            return response.send({
+        if(data[0].exists) {
+            return response.status(201).send({
                 message: 'You have already been visited!',
-                count,
+                count: data[0].count,
             });
         }
-
-        const geoAddress = geoip.lookup(ip);
-        const newLocation = new Location({
-            ip,
-            range: geoAddress.range,
-            country: geoAddress.country,
-            region: geoAddress.region,
-            timezone: geoAddress.timezone,
-            city: geoAddress.city,
-            ll: geoAddress.ll
-        });
-        await newLocation.save();
-
-        return response.status(201).send({
-            message: 'Welcome!',
-            count: count + 1
+        
+        return response.send({
+            message: 'Welcome',
+            count: data[0].count + 1,
         })
+
     }
     catch ({ message }) {
         return response.status(500).send({
