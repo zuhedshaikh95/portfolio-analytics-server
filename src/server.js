@@ -46,7 +46,7 @@ app.get('/visit', async (request, response) => {
             },
         ]);
 
-        if(data[0].exists) {
+        if (data[0].exists) {
             return response.status(201).send({
                 message: 'You have already been visited!',
                 count: data[0].count,
@@ -64,7 +64,7 @@ app.get('/visit', async (request, response) => {
             ll: geoAddress.ll
         });
         await newLocation.save();
-        
+
         return response.send({
             message: 'Welcome!',
             count: data[0].count + 1,
