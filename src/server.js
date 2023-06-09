@@ -66,7 +66,7 @@ app.get('/visit', async (request, response) => {
         await newLocation.save();
         
         return response.send({
-            message: 'Welcome',
+            message: 'Welcome!',
             count: data[0].count + 1,
         })
 
