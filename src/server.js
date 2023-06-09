@@ -52,6 +52,18 @@ app.get('/visit', async (request, response) => {
                 count: data[0].count,
             });
         }
+
+        const geoAddress = geoip.lookup(ip);
+        const newLocation = new Location({
+            ip,
+            range: geoAddress.range,
+            country: geoAddress.country,
+            region: geoAddress.region,
+            timezone: geoAddress.timezone,
+            city: geoAddress.city,
+            ll: geoAddress.ll
+        });
+        await newLocation.save();
         
         return response.send({
             message: 'Welcome',
